@@ -6,7 +6,7 @@
                 "inputs": {
                     "body": {
                         "Body": {
-                            "Content": "<p>@{triggerBody()?['AlertDisplayName']} @{triggerBody()?['Severity']}<br>\n@{triggerBody()?['Description']}<br>\n@{triggerBody()?['ProductName']}<br>\n@{triggerBody()}</p>",
+                            "Content": "<p><strong>Alert:</strong> @{triggerBody()?['AlertDisplayName']} <br>\n<strong>Severity:</strong> @{triggerBody()?['Severity']}<br>\n<strong>Description:</strong> @{triggerBody()?['Description']}<br>\n<strong>Issuing Product:</strong> @{triggerBody()?['ProductName']}</p>",
                             "ContentType": "HTML"
                         },
                         "DueDateTime": {
