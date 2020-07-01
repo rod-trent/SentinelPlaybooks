@@ -1,0 +1,164 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Alert_-_Get_accounts": {
+                "inputs": {
+                    "body": "@triggerBody()?['Entities']",
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azuresentinel_3']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "path": "/entities/account"
+                },
+                "runAfter": {
+                    "Alert_-_Get_incident": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "Alert_-_Get_incident": {
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azuresentinel_2']['connectionId']"
+                        }
+                    },
+                    "method": "get",
+                    "path": "/Cases/@{encodeURIComponent(triggerBody()?['SystemAlertId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceSubscriptionId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceResourceGroup'])}"
+                },
+                "runAfter": {},
+                "type": "ApiConnection"
+            },
+            "For_each": {
+                "actions": {
+                    "Add_comment_to_incident": {
+                        "inputs": {
+                            "host": {
+                                "connection": {
+                                    "name": "@parameters('$connections')['azuresentinel_4']['connectionId']"
+                                }
+                            },
+                            "method": "put",
+                            "path": "/Comment/@{encodeURIComponent(triggerBody()?['WorkspaceSubscriptionId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceResourceGroup'])}/@{encodeURIComponent('Incident')}/@{encodeURIComponent(body('Alert_-_Get_incident')?['properties']?['CaseNumber'])}/@{encodeURIComponent('User was disabled in AAD via playbook')}"
+                        },
+                        "runAfter": {
+                            "Send_an_email_(V2)": [
+                                "Succeeded"
+                            ]
+                        },
+                        "type": "ApiConnection"
+                    },
+                    "Send_an_email_(V2)": {
+                        "inputs": {
+                            "body": {
+                                "Body": "<p>This is an alert from your security team...your account has been locked out until you contact us.</p>",
+                                "Subject": "Alert from your security team",
+                                "To": "@{concat(items('For_each')?['Name'], '@', items('for_each')?['UPNSuffix'])}"
+                            },
+                            "host": {
+                                "connection": {
+                                    "name": "@parameters('$connections')['office365']['connectionId']"
+                                }
+                            },
+                            "method": "post",
+                            "path": "/v2/Mail"
+                        },
+                        "runAfter": {
+                            "Update_user": [
+                                "Succeeded"
+                            ]
+                        },
+                        "type": "ApiConnection"
+                    },
+                    "Update_user": {
+                        "inputs": {
+                            "body": {
+                                "accountEnabled": false
+                            },
+                            "host": {
+                                "connection": {
+                                    "name": "@parameters('$connections')['azuread_1']['connectionId']"
+                                }
+                            },
+                            "method": "patch",
+                            "path": "/v1.0/users/@{encodeURIComponent(concat(items('For_each')?['Name'], '@', items('for_each')?['UPNSuffix']))}"
+                        },
+                        "runAfter": {},
+                        "type": "ApiConnection"
+                    }
+                },
+                "foreach": "@body('Alert_-_Get_accounts')?['Accounts']",
+                "runAfter": {
+                    "Alert_-_Get_accounts": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "Foreach"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "defaultValue": {},
+                "type": "Object"
+            }
+        },
+        "triggers": {
+            "When_a_response_to_an_Azure_Sentinel_alert_is_triggered": {
+                "inputs": {
+                    "body": {
+                        "callback_url": "@{listCallbackUrl()}"
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azuresentinel_1']['connectionId']"
+                        }
+                    },
+                    "path": "/subscribe"
+                },
+                "type": "ApiConnectionWebhook"
+            }
+        }
+    },
+    "parameters": {
+        "$connections": {
+            "value": {
+                "azuread_1": {
+                    "connectionId": "/subscriptions/e6799fb8-c1f1-412b-a8d0-e58131aeacbc/resourceGroups/6MDMAzureSentinel/providers/Microsoft.Web/connections/azuread-1",
+                    "connectionName": "azuread-1",
+                    "id": "/subscriptions/e6799fb8-c1f1-412b-a8d0-e58131aeacbc/providers/Microsoft.Web/locations/eastus/managedApis/azuread"
+                },
+                "azuresentinel_1": {
+                    "connectionId": "/subscriptions/e6799fb8-c1f1-412b-a8d0-e58131aeacbc/resourceGroups/6MDMAzureSentinel/providers/Microsoft.Web/connections/azuresentinel-6",
+                    "connectionName": "azuresentinel-6",
+                    "id": "/subscriptions/e6799fb8-c1f1-412b-a8d0-e58131aeacbc/providers/Microsoft.Web/locations/eastus/managedApis/azuresentinel"
+                },
+                "azuresentinel_2": {
+                    "connectionId": "/subscriptions/e6799fb8-c1f1-412b-a8d0-e58131aeacbc/resourceGroups/6MDMAzureSentinel/providers/Microsoft.Web/connections/azuresentinel-7",
+                    "connectionName": "azuresentinel-7",
+                    "id": "/subscriptions/e6799fb8-c1f1-412b-a8d0-e58131aeacbc/providers/Microsoft.Web/locations/eastus/managedApis/azuresentinel"
+                },
+                "azuresentinel_3": {
+                    "connectionId": "/subscriptions/e6799fb8-c1f1-412b-a8d0-e58131aeacbc/resourceGroups/6MDMAzureSentinel/providers/Microsoft.Web/connections/azuresentinel-8",
+                    "connectionName": "azuresentinel-8",
+                    "id": "/subscriptions/e6799fb8-c1f1-412b-a8d0-e58131aeacbc/providers/Microsoft.Web/locations/eastus/managedApis/azuresentinel"
+                },
+                "azuresentinel_4": {
+                    "connectionId": "/subscriptions/e6799fb8-c1f1-412b-a8d0-e58131aeacbc/resourceGroups/6MDMAzureSentinel/providers/Microsoft.Web/connections/azuresentinel-9",
+                    "connectionName": "azuresentinel-9",
+                    "id": "/subscriptions/e6799fb8-c1f1-412b-a8d0-e58131aeacbc/providers/Microsoft.Web/locations/eastus/managedApis/azuresentinel"
+                },
+                "office365": {
+                    "connectionId": "/subscriptions/e6799fb8-c1f1-412b-a8d0-e58131aeacbc/resourceGroups/6MDMAzureSentinel/providers/Microsoft.Web/connections/office365-2",
+                    "connectionName": "office365-2",
+                    "id": "/subscriptions/e6799fb8-c1f1-412b-a8d0-e58131aeacbc/providers/Microsoft.Web/locations/eastus/managedApis/office365"
+                }
+            }
+        }
+    }
+}
