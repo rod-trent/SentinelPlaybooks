@@ -82,10 +82,10 @@
             },
             "For_each": {
                 "actions": {
-                    "Add_comment_to_incident_((V2))": {
+                    "Add_comment_to_incident_(V2)": {
                         "inputs": {
                             "body": {
-                                "Value": "IP Address @{items('For_each')?['Address']} is located in @{body('Parse_JSON')?['city']}, @{body('Parse_JSON')?['regionName']} @{body('Parse_JSON')?['country']} and is attributed to @{body('Parse_JSON')?['isp']}"
+                                "Value": "IP Address @{items('For_each')?['query']} is located in @{body('Parse_JSON')?['city']}, @{body('Parse_JSON')?['regionName']} @{body('Parse_JSON')?['country']} and is attributed to @{body('Parse_JSON')?['isp']}"
                             },
                             "host": {
                                 "connection": {
