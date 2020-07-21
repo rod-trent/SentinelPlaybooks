@@ -86,16 +86,16 @@
                     "Add_comment_to_incident_(V2)": {
                         "inputs": {
                             "body": {
-                                "Value": "IP Address @{items('For_each')?['Address']} is located in @{body('Parse_JSON')?['city']}, @{body('Parse_JSON')?['regionName']} @{body('Parse_JSON')?['country']} and is attributed to @{body('Parse_JSON')?['isp']}"
+                                "Value": "IP Address @{body('Parse_JSON')?['query']} is located in @{body('Parse_JSON')?['city']}, @{body('Parse_JSON')?['regionName']} @{body('Parse_JSON')?['country']} and attributed to @{body('Parse_JSON')?['isp']}"
                             },
-                                        "host": {
-                                            "connection": {
-                                                "name": "@parameters('$connections')['azuresentinel']['connectionId']"
-                                            }
-                                        },
-                                        "method": "put",
-                                        "path": "/Case/@{encodeURIComponent(triggerBody()?['WorkspaceSubscriptionId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceResourceGroup'])}/@{encodeURIComponent('Incident')}/@{encodeURIComponent(body('Alert_-_Get_incident')?['properties']?['CaseNumber'])}/AddLabels"
-                                    },
+                            "host": {
+                                "connection": {
+                                    "name": "@parameters('$connections')['azuresentinel_1']['connectionId']"
+                                }
+                            },
+                            "method": "put",
+                            "path": "/Comment/@{encodeURIComponent(triggerBody()?['WorkspaceSubscriptionId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceResourceGroup'])}/@{encodeURIComponent('Incident')}/@{encodeURIComponent(body('Alert_-_Get_incident')?['properties']?['CaseNumber'])}"
+                        },
                                     "runAfter": {
                                         "Parse_JSON": [
                                             "Succeeded"
