@@ -7,7 +7,7 @@
     },
     "parameters": {
         "PlaybookName": {
-            "defaultValue": "IPAddr2GEO2Tags",
+            "defaultValue": "IPAddr2GEO2Comments",
             "type": "string"
         },
         "UserName": {
