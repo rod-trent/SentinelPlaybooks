@@ -2,7 +2,7 @@
 
 Based on the original Get-GeoFromIpAndTagIncident from the Azure Sentinel GitHub repository (aka.ms/ASGitHub), this update places the city, country, and IP address in the Tags section of the Azure Sentinel Incident.
 
-See (URL) for more information.
+See https://secureinfra.blog/2020/07/21/modified-ip-address-to-geo-to-tags-azure-sentinel-playbook/ for more information.
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Frod-trent%2FSentinelPlaybooks%2Fmaster%2FIP2GEO2Tags-2%2Fazuredeploy.json)
 [![Deploy to Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazuregov.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Frod-trent%2FSentinelPlaybooks%2Fmaster%2FIP2GEO2Tags-2%2Fazuredeploy.json)
