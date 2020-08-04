@@ -13,10 +13,10 @@
                     "method": "post",
                     "path": "/visualizeQuery",
                     "queries": {
-                        "resourcegroups": "resourcegroup",
-                        "resourcename": "resourcename",
+                        "resourcegroups": "<resourcegroup>",
+                        "resourcename": "<resourcename>",
                         "resourcetype": "Log Analytics Workspace",
-                        "subscriptions": "subscription",
+                        "subscriptions": "<subscription>",
                         "timerange": "Set in query",
                         "visType": "Html Table"
                     }
@@ -29,7 +29,7 @@
                     "body": {
                         "Body": "<p><span style=\"font-size: 18px\"><strong>Here is the list of Incidents that were created overnight:</strong></span><br>\n<br>\n@{base64ToString(body('Run_query_and_visualize_results')?['attachmentContent'])}</p>",
                         "Subject": "Azure Sentinel Incidents Created Overnight",
-                        "To": "<email@address.com"
+                        "To": "<email@address.com>"
                     },
                     "host": {
                         "connection": {
@@ -77,14 +77,14 @@
         "$connections": {
             "value": {
                 "azuremonitorlogs_1": {
-                    "connectionId": "connectionID",
-                    "connectionName": "connectionName",
-                    "id": "subscriptionID"
+                    "connectionId": "<connectionID>",
+                    "connectionName": "<connectionName>",
+                    "id": "<subscriptionID>"
                 },
                 "office365_1": {
-                    "connectionId": "connectionID",
-                    "connectionName": "connectionName",
-                    "id": "subscriptionID"
+                    "connectionId": "<connectionID>",
+                    "connectionName": "<connectionName>",
+                    "id": "<subscriptionID>"
                 }
             }
         }
