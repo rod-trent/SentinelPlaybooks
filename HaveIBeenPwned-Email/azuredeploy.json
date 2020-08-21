@@ -8,7 +8,7 @@
                         {
                             "name": "hibp-api-key",
                             "type": "string",
-                            "value": "cc570cd14fd8482f92d1d57e5b13ccab"
+                            "value": "['APIKey']"
                         }
                     ]
                 },
@@ -249,7 +249,7 @@
                 "azuresentinel": {
                     "connectionId": "/subscriptions/['subscriptionID']/resourceGroups/['resourcegroup']/providers/Microsoft.Web/connections/azuresentinel",
                     "connectionName": "azuresentinel",
-                    "id": "/subscriptions/['subscriptionID'/providers/Microsoft.Web/locations/eastus/managedApis/azuresentinel"
+                    "id": "/subscriptions/['subscriptionID']/providers/Microsoft.Web/locations/eastus/managedApis/azuresentinel"
                 }
             }
         }
