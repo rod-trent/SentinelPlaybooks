@@ -12,6 +12,7 @@
     },
     "resources": [
       {
+        "type": "Microsoft.Logic/workflows",
         "apiVersion": "2016-06-01",
         "dependsOn": [],
         "name": "[parameters('PlaybookName')]",
