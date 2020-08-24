@@ -271,3 +271,4 @@
       "AzureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]"
     }
   }
+}
