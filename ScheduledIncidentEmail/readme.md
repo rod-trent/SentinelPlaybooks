@@ -4,7 +4,7 @@ This Logic App queries the Log Analytics workspace for Azure Sentinel and then g
 
 The email looks like the following...
 
-
+<img src="EmailFromParameters.png" alt="Sample Email">
 
 See <a href="https://secureinfra.blog/2020/08/04/azure-sentinel-sending-an-email-each-morning-with-the-list-of-daily-incidents-created/">Azure Sentinel: Sending an Email Each Morning with the List of Daily Incidents Created</a> for more information.
 
