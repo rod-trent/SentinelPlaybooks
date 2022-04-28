@@ -21,7 +21,7 @@
     },
     "parameters":  {
         "PlaybookName":  {
-            "defaultValue":  "Send Daily Incident Notification Email",
+            "defaultValue":  "Send_Daily_Incident_Notification_Email",
             "type":  "string"
         },
         "EmailAddress":  {
@@ -168,7 +168,7 @@
             "type":  "Microsoft.Logic/workflows",
             "location":  "[resourceGroup().location]",
             "tags":  {
-                "hidden-SentinelTemplateName":  "Send Daily Incident Notification Email",
+                "hidden-SentinelTemplateName":  "Send_Daily_Incident_Notification_Email",
                 "hidden-SentinelTemplateVersion":  "1.0"
             },
             "identity":  {
