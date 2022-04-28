@@ -1,6 +1,6 @@
 # ScheduledIncidentEmail
 
-This Logic App queries the Log Analytics workspace for Azure Sentinel and then generates an email that delivers every morning at 7am. The email contains TimeGenerated, Title, Description, Severity, IncidentUrl.
+This Logic App queries the Log Analytics workspace for Microsoft Sentinel and then generates an email that delivers every morning at 7am. The email contains TimeGenerated, Title, Description, Severity, IncidentUrl.
 
 The email looks like the following...
 
