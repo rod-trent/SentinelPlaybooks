@@ -168,7 +168,7 @@
             "type":  "Microsoft.Logic/workflows",
             "location":  "[resourceGroup().location]",
             "tags":  {
-                "hidden-SentinelTemplateName":  "Send_Daily_Incident_Notification_Email",
+                "hidden-SentinelTemplateName":  "SendDailyIncidentNotificationEmail",
                 "hidden-SentinelTemplateVersion":  "1.0"
             },
             "identity":  {
