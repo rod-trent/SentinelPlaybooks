@@ -21,7 +21,7 @@
     },
     "parameters":  {
         "PlaybookName":  {
-            "defaultValue":  "Send Daily Incident Email Notification",
+            "defaultValue":  "Send Daily Incident Notification Email",
             "type":  "string"
         },
         "EmailAddress":  {
@@ -40,12 +40,6 @@
             "type":  "string",
             "metadata":  {
                 "description":  "Enter value for ResourceName"
-            }
-        },
-        "SubscriptionID":  {
-            "type":  "string",
-            "metadata":  {
-                "description":  "Enter value for SubscriptionID"
             }
         }
     },
@@ -77,10 +71,6 @@
                         },
                         "ResourceName":  {
                             "defaultValue":  "[parameters('ResourceName')]",
-                            "type":  "string"
-                        },
-                        "SubscriptionID":  {
-                            "defaultValue":  "[parameters('SubscriptionID')]",
                             "type":  "string"
                         }
                     },
@@ -178,7 +168,7 @@
             "type":  "Microsoft.Logic/workflows",
             "location":  "[resourceGroup().location]",
             "tags":  {
-                "hidden-SentinelTemplateName":  "RodDailyIncidentEmail",
+                "hidden-SentinelTemplateName":  "Send Daily Incident Notification Email",
                 "hidden-SentinelTemplateVersion":  "1.0"
             },
             "identity":  {
