@@ -21,7 +21,7 @@
     },
     "parameters":  {
         "PlaybookName":  {
-            "defaultValue":  "Send_Daily_Incident_Notification_Email",
+            "defaultValue":  "SendDailyIncidentNotificationEmail",
             "type":  "string"
         },
         "EmailAddress":  {
