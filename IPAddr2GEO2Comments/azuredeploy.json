@@ -1,227 +1,258 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "metadata": {
-        "comments": "This Azure Sentinel Playbook takes the IP Address entities list and gets the GEO location from IP-API.com, then writes the information to the Incident comments.",
-        "author": "Rod Trent - with Nicholas DiCola (original Playbook)"
-    },   
-    "parameters": {
-        "PlaybookName": {
-            "defaultValue": "IP2GEO2Comments",
-            "type": "string"
+    "$schema":  "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion":  "1.0.0.0",
+    "metadata":  {
+        "title":  "",
+        "description":  "",
+        "prerequisites":  "",
+        "postDeployment":  [
+        ],
+        "prerequisitesDeployTemplateFile":  "",
+        "lastUpdateTime":  "",
+        "entities":  [
+        ],
+        "tags":  [
+        ],
+        "support":  {
+            "tier":  "community",
+            "armtemplate":  "Generated from https://github.com/Azure/Azure-Sentinel/tree/master/Tools/Playbook-ARM-Template-Generator"
         },
-        "UserName": {
-            "defaultValue": "<username>@<domain>",
-            "type": "string"
+        "author":  {
+            "name":  ""
         }
     },
-    "variables": {
-        "AzureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]"
+    "parameters":  {
+        "PlaybookName":  {
+            "defaultValue":  "IPAddrGEO2Comments",
+            "type":  "string"
+        }
     },
-    "resources": [
+    "variables":  {
+        "MicrosoftSentinelConnectionName":  "[concat('MicrosoftSentinel-', parameters('PlaybookName'))]"
+    },
+    "resources":  [
         {
-            "type": "Microsoft.Web/connections",
-            "apiVersion": "2016-06-01",
-            "name": "[variables('AzureSentinelConnectionName')]",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "displayName": "[parameters('UserName')]",
-                "customParameterValues": {
-                },
-                "api": {
-                    "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azuresentinel')]"
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Logic/workflows",
-            "apiVersion": "2017-07-01",
-            "name": "[parameters('PlaybookName')]",
-            "location": "[resourceGroup().location]",
-            "tags": {
-                "LogicAppsCategory": "security"
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.Web/connections', variables('AzureSentinelConnectionName'))]"
-            ],
-            "properties": {
-                "state": "Enabled",
-                "definition": {
-                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-                    "actions": {
-                        "Alert_-_Get_IPs": {
-                            "inputs": {
-                                "body": "@triggerBody()?['Entities']",
-                                "host": {
-                                    "connection": {
-                                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+            "properties":  {
+                "provisioningState":  "Succeeded",
+                "state":  "Enabled",
+                "definition":  {
+                    "$schema":  "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion":  "1.0.0.0",
+                    "parameters":  {
+                        "$connections":  {
+                            "defaultValue":  {
+                            },
+                            "type":  "Object"
+                        }
+                    },
+                    "triggers":  {
+                        "When_a_response_to_an_Azure_Sentinel_alert_is_triggered":  {
+                            "type":  "ApiConnectionWebhook",
+                            "inputs":  {
+                                "body":  {
+                                    "callback_url":  "@{listCallbackUrl()}"
+                                },
+                                "host":  {
+                                    "connection":  {
+                                        "name":  "@parameters('$connections')['azuresentinel']['connectionId']"
                                     }
                                 },
-                                "method": "post",
-                                "path": "/entities/ip"
+                                "path":  "/subscribe"
+                            }
+                        }
+                    },
+                    "actions":  {
+                        "Alert_-_Get_incident":  {
+                            "runAfter":  {
                             },
-                            "runAfter": {
-                                "Alert_-_Get_incident": [
+                            "type":  "ApiConnection",
+                            "inputs":  {
+                                "host":  {
+                                    "connection":  {
+                                        "name":  "@parameters('$connections')['azuresentinel']['connectionId']"
+                                    }
+                                },
+                                "method":  "get",
+                                "path":  "/Incidents/subscriptions/@{encodeURIComponent(triggerBody()?['WorkspaceSubscriptionId'])}/resourceGroups/@{encodeURIComponent(triggerBody()?['WorkspaceResourceGroup'])}/workspaces/@{encodeURIComponent(triggerBody()?['WorkspaceId'])}/alerts/@{encodeURIComponent(triggerBody()?['SystemAlertId'])}"
+                            }
+                        },
+                        "Entities_-_Get_IPs_2":  {
+                            "runAfter":  {
+                                "Alert_-_Get_incident":  [
                                     "Succeeded"
                                 ]
                             },
-                            "type": "ApiConnection"
-                        },
-                        "Alert_-_Get_incident": {
-                            "inputs": {
-                                "host": {
-                                    "connection": {
-                                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                            "type":  "ApiConnection",
+                            "inputs":  {
+                                "body":  "@triggerBody()?['Entities']",
+                                "host":  {
+                                    "connection":  {
+                                        "name":  "@parameters('$connections')['azuresentinel_4']['connectionId']"
                                     }
                                 },
-                                "method": "get",
-                                "path": "/Cases/@{encodeURIComponent(triggerBody()?['SystemAlertId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceSubscriptionId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceResourceGroup'])}"
-                            },
-                            "runAfter": {
-                            },
-                            "type": "ApiConnection"
+                                "method":  "post",
+                                "path":  "/entities/ip"
+                            }
                         },
-                        "For_each": {
-                            "actions": {
-                                "Add_comment_to_incident_(V2)": {
-                                    "inputs": {
-                                        "body": {
-                                "Value": "IP Address @{items('For_each')?['Address']} is located in @{body('Parse_JSON')?['city']}, @{body('Parse_JSON')?['regionName']} @{body('Parse_JSON')?['country']} and is attributed to @{body('Parse_JSON')?['isp']}."
+                        "For_each":  {
+                            "foreach":  "@body('Entities_-_Get_IPs_2')?['IPs']",
+                            "actions":  {
+                                "Add_comment_to_incident_(V3)":  {
+                                    "runAfter":  {
+                                        "Parse_JSON":  [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type":  "ApiConnection",
+                                    "inputs":  {
+                                        "body":  {
+                                            "incidentArmId":  "@body('Alert_-_Get_incident')?['id']",
+                                            "message":  "\u003cp\u003eIP Address @{items('For_each')?['Address']} is located in @{body('Parse_JSON')?['city']}, @{body('Parse_JSON')?['regionName']} @{body('Parse_JSON')?['country']} and is attributed to @{body('Parse_JSON')?['isp']}.\u003c/p\u003e"
                                         },
-                                        "host": {
-                                            "connection": {
-                                                "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                                        "host":  {
+                                            "connection":  {
+                                                "name":  "@parameters('$connections')['azuresentinel']['connectionId']"
                                             }
                                         },
-                                        "method": "put",
-                                        "path": "/Case/@{encodeURIComponent(triggerBody()?['WorkspaceSubscriptionId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceResourceGroup'])}/@{encodeURIComponent('Incident')}/@{encodeURIComponent(body('Alert_-_Get_incident')?['properties']?['CaseNumber'])}/AddLabels"
+                                        "method":  "post",
+                                        "path":  "/Incidents/Comment"
+                                    }
+                                },
+                                "HTTP":  {
+                                    "runAfter":  {
                                     },
-                                    "runAfter": {
-                                        "Parse_JSON": [
+                                    "type":  "Http",
+                                    "inputs":  {
+                                        "method":  "GET",
+                                        "uri":  "http://ip-api.com/json/@{items('For_each')?['Address']}"
+                                    }
+                                },
+                                "Parse_JSON":  {
+                                    "runAfter":  {
+                                        "HTTP":  [
                                             "Succeeded"
                                         ]
                                     },
-                                    "type": "ApiConnection"
-                                },
-                                "HTTP": {
-                                    "inputs": {
-                                        "method": "GET",
-                                        "uri": "http://ip-api.com/json/@{items('For_each')?['Address']}"
-                                    },
-                                    "runAfter": {
-                                    },
-                                    "type": "Http"
-                                },
-                                "Parse_JSON": {
-                                    "inputs": {
-                                        "content": "@body('HTTP')",
-                                        "schema": {
-                                            "properties": {
-                                                "as": {
-                                                    "type": "string"
+                                    "type":  "ParseJson",
+                                    "inputs":  {
+                                        "content":  "@body('HTTP')",
+                                        "schema":  {
+                                            "properties":  {
+                                                "as":  {
+                                                    "type":  "string"
                                                 },
-                                                "city": {
-                                                    "type": "string"
+                                                "city":  {
+                                                    "type":  "string"
                                                 },
-                                                "country": {
-                                                    "type": "string"
+                                                "country":  {
+                                                    "type":  "string"
                                                 },
-                                                "countryCode": {
-                                                    "type": "string"
+                                                "countryCode":  {
+                                                    "type":  "string"
                                                 },
-                                                "isp": {
-                                                    "type": "string"
+                                                "isp":  {
+                                                    "type":  "string"
                                                 },
-                                                "lat": {
-                                                    "type": "number"
+                                                "lat":  {
+                                                    "type":  "number"
                                                 },
-                                                "lon": {
-                                                    "type": "number"
+                                                "lon":  {
+                                                    "type":  "number"
                                                 },
-                                                "org": {
-                                                    "type": "string"
+                                                "org":  {
+                                                    "type":  "string"
                                                 },
-                                                "query": {
-                                                    "type": "string"
+                                                "query":  {
+                                                    "type":  "string"
                                                 },
-                                                "region": {
-                                                    "type": "string"
+                                                "region":  {
+                                                    "type":  "string"
                                                 },
-                                                "regionName": {
-                                                    "type": "string"
+                                                "regionName":  {
+                                                    "type":  "string"
                                                 },
-                                                "status": {
-                                                    "type": "string"
+                                                "status":  {
+                                                    "type":  "string"
                                                 },
-                                                "timezone": {
-                                                    "type": "string"
+                                                "timezone":  {
+                                                    "type":  "string"
                                                 },
-                                                "zip": {
-                                                    "type": "string"
+                                                "zip":  {
+                                                    "type":  "string"
                                                 }
                                             },
-                                            "type": "object"
+                                            "type":  "object"
                                         }
-                                    },
-                                    "runAfter": {
-                                        "HTTP": [
-                                            "Succeeded"
-                                        ]
-                                    },
-                                    "type": "ParseJson"
+                                    }
                                 }
                             },
-                            "foreach": "@body('Alert_-_Get_IPs')?['IPs']",
-                            "runAfter": {
-                                "Alert_-_Get_IPs": [
+                            "runAfter":  {
+                                "Entities_-_Get_IPs_2":  [
                                     "Succeeded"
                                 ]
                             },
-                            "type": "Foreach",
-                            "runtimeConfiguration": {
-                                "concurrency": {
-                                    "repetitions": 1
+                            "type":  "Foreach",
+                            "runtimeConfiguration":  {
+                                "concurrency":  {
+                                    "repetitions":  1
                                 }
                             }
                         }
                     },
-                    "contentVersion": "1.0.0.0",
-                    "outputs": {
-                    },
-                    "parameters": {
-                        "$connections": {
-                            "defaultValue": {
-                            },
-                            "type": "Object"
-                        }
-                    },
-                    "triggers": {
-                        "When_a_response_to_an_Azure_Sentinel_alert_is_triggered": {
-                            "inputs": {
-                                "body": {
-                                    "callback_url": "@{listCallbackUrl()}"
-                                },
-                                "host": {
-                                    "connection": {
-                                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
-                                    }
-                                },
-                                "path": "/subscribe"
-                            },
-                            "type": "ApiConnectionWebhook"
-                        }
+                    "outputs":  {
                     }
                 },
-                "parameters": {
-                    "$connections": {
-                        "value": {
-                            "azuresentinel": {
-                                "connectionId": "[resourceId('Microsoft.Web/connections', variables('AzureSentinelConnectionName'))]",
-                                "connectionName": "[variables('AzureSentinelConnectionName')]",
-                                "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azuresentinel')]"
+                "parameters":  {
+                    "$connections":  {
+                        "value":  {
+                            "azuresentinel":  {
+                                "connectionId":  "[resourceId('Microsoft.Web/connections', variables('MicrosoftSentinelConnectionName'))]",
+                                "connectionName":  "[variables('MicrosoftSentinelConnectionName')]",
+                                "id":  "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/Azuresentinel')]",
+                                "connectionProperties":  {
+                                    "authentication":  {
+                                        "type":  "ManagedServiceIdentity"
+                                    }
+                                }
+                            },
+                            "azuresentinel_4":  {
+                                "connectionId":  "/subscriptions/2959f496-711b-447e-9b85-53a1da341c4c/resourceGroups/RodAzureSentinel/providers/Microsoft.Web/connections/azuresentinel-30",
+                                "connectionName":  "azuresentinel-30",
+                                "id":  "/subscriptions/2959f496-711b-447e-9b85-53a1da341c4c/providers/Microsoft.Web/locations/eastus/managedApis/azuresentinel"
                             }
                         }
                     }
+                }
+            },
+            "name":  "[parameters('PlaybookName')]",
+            "type":  "Microsoft.Logic/workflows",
+            "location":  "[resourceGroup().location]",
+            "tags":  {
+                "LogicAppsCategory":  "security",
+                "hidden-SentinelTemplateName":  "IPAddrGEO2Comments",
+                "hidden-SentinelTemplateVersion":  "1.0"
+            },
+            "identity":  {
+                "type":  "SystemAssigned"
+            },
+            "apiVersion":  "2017-07-01",
+            "dependsOn":  [
+                "[resourceId('Microsoft.Web/connections', variables('MicrosoftSentinelConnectionName'))]"
+            ]
+        },
+        {
+            "type":  "Microsoft.Web/connections",
+            "apiVersion":  "2016-06-01",
+            "name":  "[variables('MicrosoftSentinelConnectionName')]",
+            "location":  "[resourceGroup().location]",
+            "kind":  "V1",
+            "properties":  {
+                "displayName":  "[variables('MicrosoftSentinelConnectionName')]",
+                "customParameterValues":  {
+                },
+                "parameterValueType":  "Alternative",
+                "api":  {
+                    "id":  "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/Azuresentinel')]"
                 }
             }
         }
