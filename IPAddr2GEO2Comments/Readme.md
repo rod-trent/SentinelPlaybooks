@@ -1,7 +1,7 @@
 # IPAddr2GEO2Comments
 
 IPAddr2GEO2Comments
-Based on the original Get-GeoFromIpAndTagIncident from the Azure Sentinel GitHub repository (aka.ms/ASGitHub), this update places the city, country, and IP address in the Comments section of the Azure Sentinel Incident instead of the Tags.
+Based on the original Get-GeoFromIpAndTagIncident from the Azure Sentinel GitHub repository (aka.ms/ASGitHub), this update places the city, country, and IP address in the Comments section of the Microsoft Sentinel Incident instead of the Tags.
 
 See <a href="https://cda.ms/4nx" target="_blank">How to Add Geographical Data for IP Addresses to an Azure Sentinel Incident</a> for more information.
 
