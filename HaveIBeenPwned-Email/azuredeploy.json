@@ -1,305 +1,352 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "metadata": {
-        "comments": "This playbook takes the email address entities of the Incident and compares them against the HaveIBeenPwned API to identify compromised accounts.",
-        "author": "Rod Trent"
-    },        
-        "parameters": {
-        "PlaybookName": {
-            "defaultValue": "HaveIBeenPwnedEmail",
-            "type": "string"
+    "$schema":  "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion":  "1.0.0.0",
+    "metadata":  {
+        "title":  "",
+        "description":  "",
+        "prerequisites":  "",
+        "postDeployment":  [
+        ],
+        "prerequisitesDeployTemplateFile":  "",
+        "lastUpdateTime":  "",
+        "entities":  [
+        ],
+        "tags":  [
+        ],
+        "support":  {
+            "tier":  "community",
+            "armtemplate":  "Generated from https://github.com/Azure/Azure-Sentinel/tree/master/Tools/Playbook-ARM-Template-Generator"
         },
-        "UserName": {
-            "defaultValue": "<username>@<domain>",
-            "type": "string"
+        "author":  {
+            "name":  ""
         }
     },
-    "variables": {
-        "AzureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]"
-    },
-    "resources": [
-        {
-            "type": "Microsoft.Web/connections",
-            "apiVersion": "2016-06-01",
-            "name": "[variables('AzureSentinelConnectionName')]",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "displayName": "[parameters('UserName')]",
-                "customParameterValues": {
-                },
-                "api": {
-                    "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azuresentinel')]"
-                }
+    "parameters":  {
+        "PlaybookName":  {
+            "defaultValue":  "HaveIBeenPwnedEmail",
+            "type":  "string"
+        },
+        "APIKey":  {
+            "type":  "string",
+            "metadata":  {
+                "description":  "Enter value for APIKey"
             }
-        },        
+        }
+    },
+    "variables":  {
+        "MicrosoftSentinelConnectionName":  "[concat('MicrosoftSentinel-', parameters('PlaybookName'))]"
+    },
+    "resources":  [
         {
-            "type": "Microsoft.Logic/workflows",
-            "apiVersion": "2017-07-01",
-            "name": "[parameters('PlaybookName')]",
-            "location": "[resourceGroup().location]",
-            "tags": {
-                "LogicAppsCategory": "security"
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.Web/connections', variables('AzureSentinelConnectionName'))]"
-            ],
-            "properties": {
-                "state": "Enabled",
-                "definition": {
-                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-                    "contentVersion": "1.0.0.0",
-                    "parameters": {
-                        "$connections": {
-                            "defaultValue": {},
-                            "type": "Object"
+            "properties":  {
+                "provisioningState":  "Succeeded",
+                "state":  "Enabled",
+                "definition":  {
+                    "$schema":  "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion":  "1.0.0.0",
+                    "parameters":  {
+                        "$connections":  {
+                            "defaultValue":  {
+                            },
+                            "type":  "Object"
+                        },
+                        "APIKey":  {
+                            "defaultValue":  "[parameters('APIKey')]",
+                            "type":  "string"
                         }
                     },
-                    "staticResults": {
-                        "HTTP0": {
-                            "status": "Succeeded",
-                            "outputs": {
-                                "headers": {},
-                                "statusCode": "404"
+                    "staticResults":  {
+                        "HTTP0":  {
+                            "status":  "Succeeded",
+                            "outputs":  {
+                                "headers":  {
+                                },
+                                "statusCode":  "404"
                             }
                         }
                     },
-                    "triggers": {
-                        "When_a_response_to_an_Azure_Sentinel_alert_is_triggered": {
-                            "type": "ApiConnectionWebhook",
-                            "inputs": {
-                                "body": {
-                                    "callback_url": "@{listCallbackUrl()}"
+                    "triggers":  {
+                        "When_a_response_to_an_Azure_Sentinel_alert_is_triggered":  {
+                            "type":  "ApiConnectionWebhook",
+                            "inputs":  {
+                                "body":  {
+                                    "callback_url":  "@{listCallbackUrl()}"
                                 },
-                                "host": {
-                                    "connection": {
-                                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                                "host":  {
+                                    "connection":  {
+                                        "name":  "@parameters('$connections')['azuresentinel']['connectionId']"
                                     }
                                 },
-                                "path": "/subscribe"
+                                "path":  "/subscribe"
                             }
                         }
                     },
-                    "actions": {
-                        "API_Variable": {
-                            "runAfter": {},
-                            "type": "InitializeVariable",
-                            "inputs": {
-                                "variables": [
+                    "actions":  {
+                        "API_Variable":  {
+                            "runAfter":  {
+                            },
+                            "type":  "InitializeVariable",
+                            "inputs":  {
+                                "variables":  [
                                     {
-                                        "name": "hibp-api-key",
-                                        "type": "string",
-                                        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                                        "name":  "hibp-api-key",
+                                        "type":  "string",
+                                        "value":  "@parameters('APIKey')"
                                     }
                                 ]
                             }
                         },
-                        "Alert_-_Get_accounts": {
-                            "runAfter": {
-                                "Alert_-_Get_incident": [
+                        "Alert_-_Get_accounts":  {
+                            "runAfter":  {
+                                "Alert_-_Get_incident":  [
                                     "Succeeded"
                                 ]
                             },
-                            "type": "ApiConnection",
-                            "inputs": {
-                                "body": "@triggerBody()?['Entities']",
-                                "host": {
-                                    "connection": {
-                                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                            "type":  "ApiConnection",
+                            "inputs":  {
+                                "body":  "@triggerBody()?['Entities']",
+                                "host":  {
+                                    "connection":  {
+                                        "name":  "@parameters('$connections')['azuresentinel_1']['connectionId']"
                                     }
                                 },
-                                "method": "post",
-                                "path": "/entities/account"
+                                "method":  "post",
+                                "path":  "/entities/account"
                             }
                         },
-                        "Alert_-_Get_incident": {
-                            "runAfter": {
-                                "Query_Return": [
+                        "Alert_-_Get_incident":  {
+                            "runAfter":  {
+                                "Query_Return":  [
                                     "Succeeded"
                                 ]
                             },
-                            "type": "ApiConnection",
-                            "inputs": {
-                                "host": {
-                                    "connection": {
-                                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                            "type":  "ApiConnection",
+                            "inputs":  {
+                                "host":  {
+                                    "connection":  {
+                                        "name":  "@parameters('$connections')['azuresentinel_1']['connectionId']"
                                     }
                                 },
-                                "method": "get",
-                                "path": "/Cases/@{encodeURIComponent(triggerBody()?['SystemAlertId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceSubscriptionId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceResourceGroup'])}"
+                                "method":  "get",
+                                "path":  "/Cases/@{encodeURIComponent(triggerBody()?['SystemAlertId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceSubscriptionId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceResourceGroup'])}"
                             }
                         },
-                        "Asterisk_Variable": {
-                            "runAfter": {
-                                "API_Variable": [
+                        "Asterisk_Variable":  {
+                            "runAfter":  {
+                                "API_Variable":  [
                                     "Succeeded"
                                 ]
                             },
-                            "type": "InitializeVariable",
-                            "inputs": {
-                                "variables": [
+                            "type":  "InitializeVariable",
+                            "inputs":  {
+                                "variables":  [
                                     {
-                                        "name": "Asterisk",
-                                        "type": "string",
-                                        "value": "@"
+                                        "name":  "Asterisk",
+                                        "type":  "string",
+                                        "value":  "@"
                                     }
                                 ]
                             }
                         },
-                        "Email_Address_Variable": {
-                            "runAfter": {
-                                "Asterisk_Variable": [
+                        "Email_Address_Variable":  {
+                            "runAfter":  {
+                                "Asterisk_Variable":  [
                                     "Succeeded"
                                 ]
                             },
-                            "type": "InitializeVariable",
-                            "inputs": {
-                                "variables": [
+                            "type":  "InitializeVariable",
+                            "inputs":  {
+                                "variables":  [
                                     {
-                                        "name": "FullEmailAddress",
-                                        "type": "string"
+                                        "name":  "FullEmailAddress",
+                                        "type":  "string"
                                     }
                                 ]
                             }
                         },
-                        "For_each_2": {
-                            "foreach": "@body('Alert_-_Get_accounts')?['Accounts']",
-                            "actions": {
-                                "Append_to_string_variable": {
-                                    "runAfter": {},
-                                    "type": "AppendToStringVariable",
-                                    "inputs": {
-                                        "name": "FullEmailAddress",
-                                        "value": "@{items('For_each_2')?['Name']}@{variables('Asterisk')}@{items('For_each_2')?['UPNSuffix']}"
+                        "For_each_2":  {
+                            "foreach":  "@body('Alert_-_Get_accounts')?['Accounts']",
+                            "actions":  {
+                                "Append_to_string_variable":  {
+                                    "runAfter":  {
+                                    },
+                                    "type":  "AppendToStringVariable",
+                                    "inputs":  {
+                                        "name":  "FullEmailAddress",
+                                        "value":  "@{items('For_each_2')?['Name']}@{variables('Asterisk')}@{items('For_each_2')?['UPNSuffix']}"
                                     }
                                 },
-                                "Append_to_string_variable_2": {
-                                    "runAfter": {
-                                        "HTTP": [
+                                "Append_to_string_variable_2":  {
+                                    "runAfter":  {
+                                        "HTTP":  [
                                             "Succeeded",
                                             "Failed"
                                         ]
                                     },
-                                    "type": "AppendToStringVariable",
-                                    "inputs": {
-                                        "name": "Query Return",
-                                        "value": "@outputs('HTTP')['statusCode']"
+                                    "type":  "AppendToStringVariable",
+                                    "inputs":  {
+                                        "name":  "Query Return",
+                                        "value":  "@outputs('HTTP')['statusCode']"
                                     }
                                 },
-                                "Condition": {
-                                    "actions": {
-                                        "Add_comment_to_incident_(V2)": {
-                                            "runAfter": {},
-                                            "type": "ApiConnection",
-                                            "inputs": {
-                                                "body": {
-                                                    "Value": "Congratulations! @{variables('FullEmailAddress')} was not found in the Pwned Database."
+                                "Condition":  {
+                                    "actions":  {
+                                        "Add_comment_to_incident_(V2)":  {
+                                            "runAfter":  {
+                                            },
+                                            "type":  "ApiConnection",
+                                            "inputs":  {
+                                                "body":  {
+                                                    "Value":  "Congratulations! @{variables('FullEmailAddress')} was not found in the Pwned Database."
                                                 },
-                                                "host": {
-                                                    "connection": {
-                                                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                                                "host":  {
+                                                    "connection":  {
+                                                        "name":  "@parameters('$connections')['azuresentinel_1']['connectionId']"
                                                     }
                                                 },
-                                                "method": "put",
-                                                "path": "/Comment/@{encodeURIComponent(triggerBody()?['WorkspaceSubscriptionId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceResourceGroup'])}/@{encodeURIComponent('Incident')}/@{encodeURIComponent(body('Alert_-_Get_incident')?['properties']?['CaseNumber'])}"
+                                                "method":  "put",
+                                                "path":  "/Comment/@{encodeURIComponent(triggerBody()?['WorkspaceSubscriptionId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceResourceGroup'])}/@{encodeURIComponent('Incident')}/@{encodeURIComponent(body('Alert_-_Get_incident')?['properties']?['CaseNumber'])}"
                                             }
                                         }
                                     },
-                                    "runAfter": {
-                                        "Append_to_string_variable_2": [
+                                    "runAfter":  {
+                                        "Append_to_string_variable_2":  [
                                             "Succeeded"
                                         ]
                                     },
-                                    "else": {
-                                        "actions": {
-                                            "Add_comment_to_incident_(V2)_2": {
-                                                "runAfter": {},
-                                                "type": "ApiConnection",
-                                                "inputs": {
-                                                    "body": {
-                                                        "Value": "@{variables('FullEmailAddress')} has been identifed as a compromised account by haveibeenpwned."
+                                    "else":  {
+                                        "actions":  {
+                                            "Add_comment_to_incident_(V2)_2":  {
+                                                "runAfter":  {
+                                                },
+                                                "type":  "ApiConnection",
+                                                "inputs":  {
+                                                    "body":  {
+                                                        "Value":  "@{variables('FullEmailAddress')} has been identifed as a compromised account by haveibeenpwned."
                                                     },
-                                                    "host": {
-                                                        "connection": {
-                                                            "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                                                    "host":  {
+                                                        "connection":  {
+                                                            "name":  "@parameters('$connections')['azuresentinel_1']['connectionId']"
                                                         }
                                                     },
-                                                    "method": "put",
-                                                    "path": "/Comment/@{encodeURIComponent(triggerBody()?['WorkspaceSubscriptionId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceResourceGroup'])}/@{encodeURIComponent('Incident')}/@{encodeURIComponent(body('Alert_-_Get_incident')?['properties']?['CaseNumber'])}"
+                                                    "method":  "put",
+                                                    "path":  "/Comment/@{encodeURIComponent(triggerBody()?['WorkspaceSubscriptionId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceId'])}/@{encodeURIComponent(triggerBody()?['WorkspaceResourceGroup'])}/@{encodeURIComponent('Incident')}/@{encodeURIComponent(body('Alert_-_Get_incident')?['properties']?['CaseNumber'])}"
                                                 }
                                             }
                                         }
                                     },
-                                    "expression": {
-                                        "and": [
+                                    "expression":  {
+                                        "and":  [
                                             {
-                                                "equals": [
+                                                "equals":  [
                                                     "@outputs('HTTP')['statusCode']",
                                                     404
                                                 ]
                                             }
                                         ]
                                     },
-                                    "type": "If"
+                                    "type":  "If"
                                 },
-                                "HTTP": {
-                                    "runAfter": {
-                                        "Append_to_string_variable": [
+                                "HTTP":  {
+                                    "runAfter":  {
+                                        "Append_to_string_variable":  [
                                             "Succeeded"
                                         ]
                                     },
-                                    "type": "Http",
-                                    "inputs": {
-                                        "headers": {
-                                            "hibp-api-key": "@variables('hibp-api-key')"
+                                    "type":  "Http",
+                                    "inputs":  {
+                                        "headers":  {
+                                            "hibp-api-key":  "@variables('hibp-api-key')"
                                         },
-                                        "method": "GET",
-                                        "uri": "https://haveibeenpwned.com/api/v3/breachedaccount/@{variables('FullEmailAddress')}"
+                                        "method":  "GET",
+                                        "uri":  "https://haveibeenpwned.com/api/v3/breachedaccount/@{variables('FullEmailAddress')}"
                                     },
-                                    "runtimeConfiguration": {
-                                        "staticResult": {
-                                            "staticResultOptions": "Disabled",
-                                            "name": "HTTP0"
+                                    "runtimeConfiguration":  {
+                                        "staticResult":  {
+                                            "staticResultOptions":  "Disabled",
+                                            "name":  "HTTP0"
                                         }
                                     }
                                 }
                             },
-                            "runAfter": {
-                                "Alert_-_Get_accounts": [
+                            "runAfter":  {
+                                "Alert_-_Get_accounts":  [
                                     "Succeeded"
                                 ]
                             },
-                            "type": "Foreach"
+                            "type":  "Foreach"
                         },
-                        "Query_Return": {
-                            "runAfter": {
-                                "Email_Address_Variable": [
+                        "Query_Return":  {
+                            "runAfter":  {
+                                "Email_Address_Variable":  [
                                     "Succeeded"
                                 ]
                             },
-                            "type": "InitializeVariable",
-                            "inputs": {
-                                "variables": [
+                            "type":  "InitializeVariable",
+                            "inputs":  {
+                                "variables":  [
                                     {
-                                        "name": "Query Return",
-                                        "type": "string"
+                                        "name":  "Query Return",
+                                        "type":  "string"
                                     }
                                 ]
                             }
                         }
                     },
-                    "outputs": {}
+                    "outputs":  {
+                    }
                 },
-                "parameters": {
-                    "$connections": {
-                        "value": {
-                            "azuresentinel": {
-                                "connectionId": "[resourceId('Microsoft.Web/connections', variables('AzureSentinelConnectionName'))]",
-                                "connectionName": "[variables('AzureSentinelConnectionName')]",
-                                "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azuresentinel')]"
+                "parameters":  {
+                    "$connections":  {
+                        "value":  {
+                            "azuresentinel":  {
+                                "connectionId":  "[resourceId('Microsoft.Web/connections', variables('MicrosoftSentinelConnectionName'))]",
+                                "connectionName":  "[variables('MicrosoftSentinelConnectionName')]",
+                                "id":  "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/Azuresentinel')]",
+                                "connectionProperties":  {
+                                    "authentication":  {
+                                        "type":  "ManagedServiceIdentity"
+                                    }
+                                }
+                            },
+                            "azuresentinel_1":  {
+                                "connectionId":  "/subscriptions/2959f496-711b-447e-9b85-53a1da341c4c/resourceGroups/RodAzureSentinel/providers/Microsoft.Web/connections/azuresentinel-30",
+                                "connectionName":  "azuresentinel-30",
+                                "id":  "/subscriptions/2959f496-711b-447e-9b85-53a1da341c4c/providers/Microsoft.Web/locations/eastus/managedApis/azuresentinel"
                             }
                         }
                     }
+                }
+            },
+            "name":  "[parameters('PlaybookName')]",
+            "type":  "Microsoft.Logic/workflows",
+            "location":  "[resourceGroup().location]",
+            "tags":  {
+                "LogicAppsCategory":  "security",
+                "hidden-SentinelTemplateName":  "HaveIBeenPwnedEmail",
+                "hidden-SentinelTemplateVersion":  "1.0"
+            },
+            "identity":  {
+                "type":  "SystemAssigned"
+            },
+            "apiVersion":  "2017-07-01",
+            "dependsOn":  [
+                "[resourceId('Microsoft.Web/connections', variables('MicrosoftSentinelConnectionName'))]"
+            ]
+        },
+        {
+            "type":  "Microsoft.Web/connections",
+            "apiVersion":  "2016-06-01",
+            "name":  "[variables('MicrosoftSentinelConnectionName')]",
+            "location":  "[resourceGroup().location]",
+            "kind":  "V1",
+            "properties":  {
+                "displayName":  "[variables('MicrosoftSentinelConnectionName')]",
+                "customParameterValues":  {
+                },
+                "parameterValueType":  "Alternative",
+                "api":  {
+                    "id":  "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/Azuresentinel')]"
                 }
             }
         }
