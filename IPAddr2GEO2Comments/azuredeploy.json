@@ -25,6 +25,24 @@
         "PlaybookName":  {
             "defaultValue":  "IPAddrGEO2Comments",
             "type":  "string"
+        },
+        "Resource Group Name":  {
+            "type":  "string",
+            "metadata":  {
+                "description":  "Enter value for Resource Group Name"
+            }
+        },
+        "Subscription ID":  {
+            "type":  "string",
+            "metadata":  {
+                "description":  "Enter value for Subscription ID"
+            }
+        },
+        "Workspace ID":  {
+            "type":  "string",
+            "metadata":  {
+                "description":  "Enter value for Workspace ID"
+            }
         }
     },
     "variables":  {
@@ -43,6 +61,18 @@
                             "defaultValue":  {
                             },
                             "type":  "Object"
+                        },
+                        "Resource Group Name":  {
+                            "defaultValue":  "[parameters('Resource Group Name')]",
+                            "type":  "string"
+                        },
+                        "Subscription ID":  {
+                            "defaultValue":  "[parameters('Subscription ID')]",
+                            "type":  "string"
+                        },
+                        "Workspace ID":  {
+                            "defaultValue":  "[parameters('Workspace ID')]",
+                            "type":  "string"
                         }
                     },
                     "triggers":  {
@@ -73,7 +103,7 @@
                                     }
                                 },
                                 "method":  "get",
-                                "path":  "/Incidents/subscriptions/@{encodeURIComponent(triggerBody()?['WorkspaceSubscriptionId'])}/resourceGroups/@{encodeURIComponent(triggerBody()?['WorkspaceResourceGroup'])}/workspaces/@{encodeURIComponent(triggerBody()?['WorkspaceId'])}/alerts/@{encodeURIComponent(triggerBody()?['SystemAlertId'])}"
+                                "path":  "/Incidents/subscriptions/@{encodeURIComponent(parameters('Subscription ID'))}/resourceGroups/@{encodeURIComponent(parameters('Resource Group Name'))}/workspaces/@{encodeURIComponent(parameters('Workspace ID'))}/alerts/@{encodeURIComponent(triggerBody()?['SystemAlertId'])}"
                             }
                         },
                         "Entities_-_Get_IPs_2":  {
