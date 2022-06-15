@@ -1,6 +1,5 @@
 # Weather2Comments
 
-Weather2Comments
 This Playbook takes the IP address supplied through the Analytics Rule and retreives the GEO location information from IP-API. It places the city, country, and IP address in the Comments section of the Microsoft Sentinel Incident instead of the Tags.
 
 It then utilizes the API from WeatherAPI.com (a free API key for a certain number of uses) and retrieves the current weather conditions.
