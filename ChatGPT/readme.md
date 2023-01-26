@@ -1,7 +1,7 @@
 # ChatGPT-Sentinel
 
 <b>Add Recommendations to Microsoft Sentinel Incidents from ChatGPT<br><br></b>
-This Playbook sends the title and description of a Sentinel Incident to ChatGPT through the OpenAI API/Logic App and then writes the returned recommendations to the Incident's Activity Log pane.
+This Playbook sends the title and description of a Sentinel Incident to ChatGPT through the OpenAI API/Logic App connector (GPT3) and then writes the returned recommendations to the Incident's Activity Log pane.
 
 An OpenAI API key is required: https://beta.openai.com/account/api-keys <br>
 
