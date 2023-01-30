@@ -1,0 +1,92 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "querypacks_GarminFitness_name": {
+            "defaultValue": "GarminFitness",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.OperationalInsights/querypacks",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('querypacks_GarminFitness_name')]",
+            "location": "eastus",
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.OperationalInsights/querypacks/queries",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('querypacks_GarminFitness_name'), '/32dac829-8763-4cd4-8cea-a4b495bf6ce9')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/querypacks', parameters('querypacks_GarminFitness_name'))]"
+            ],
+            "properties": {
+                "displayName": "Running and Cycling Distance",
+                "description": "Shows a columnchart for running and cycling distance per month.",
+                "body": "Garmin2022Distance_CL\n| extend CSVFields = split(RawData, ',')\n| extend Month = tostring(CSVFields[0])\n| extend Activity = tostring(CSVFields[1])\n| extend Distance = tostring(CSVFields[2])\n| extend todecimal(Distance)\n| where Activity == \"Running\" or Activity == \"Cycling\"\n| distinct Month, Activity, Distance\n| render columnchart ",
+                "related": {
+                    "categories": [],
+                    "resourceTypes": [
+                        "microsoft.operationalinsights/workspaces"
+                    ]
+                },
+                "tags": {
+                    "labels": [
+                        "Garmin"
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.OperationalInsights/querypacks/queries",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('querypacks_GarminFitness_name'), '/43084d16-7eca-4e97-b2e1-61087a2da1c5')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/querypacks', parameters('querypacks_GarminFitness_name'))]"
+            ],
+            "properties": {
+                "displayName": "Garmin Strength Details Parser",
+                "description": "Parses the Strength details from Garmin",
+                "body": "Garmin2022StrengthDetails_CL\n| extend CSVFields = split(RawData, ',')\n| extend Activity = tostring(CSVFields[0])\n| extend Date = tostring(CSVFields[1])\n| extend Favorite = tostring(CSVFields[2])\n| extend Title = tostring(CSVFields[3])\n| extend Distance = tostring(CSVFields[4])\n| extend todecimal(Distance)\n| extend Calories = tostring(CSVFields[5])\n| extend todecimal(Calories)\n| extend Time = tostring(CSVFields[6])\n| extend AvgHR = tostring(CSVFields[7])\n| extend todecimal(AvgHR)\n| extend MaxHR = tostring(CSVFields[8])\n| extend todecimal(MaxHR)\n| extend AerobicTE = tostring(CSVFields[9])\n| extend todecimal(AerobicTE)\n| extend AvgRunCadence = tostring(CSVFields[10])\n| extend MaxRunCadence = tostring(CSVFields[11])\n| extend AvgSpeed = tostring(CSVFields[12])\n| extend MaxSpeed = tostring(CSVFields[13])\n| extend TotalAscent = tostring(CSVFields[14])\n| extend AvgStride = tostring(CSVFields[15])\n| extend AvgVerticalRatio = tostring(CSVFields[16])\n| extend AvgVerticalOscillation = tostring(CSVFields[17])\n| extend AvgGroundContactTime = tostring(CSVFields[18])\n| extend AvgBikeCadence = tostring(CSVFields[19])\n| extend MaxBikeCadence = tostring(CSVFields[20])\n| extend TrainingStressScore = tostring(CSVFields[21])\n| extend AvgPower = tostring(CSVFields[22])\n| extend MaxPower = tostring(CSVFields[23])\n| extend Grit = tostring(CSVFields[24])\n| extend Flow = tostring(CSVFields[25])\n| extend AvgSwolf = tostring(CSVFields[26])\n| extend AvgStrokeRate = tostring(CSVFields[27])\n| extend TotalReps = tostring(CSVFields[28])\n| extend todecimal(TotalReps)\n| extend TotalSets = tostring(CSVFields[29])\n| extend todecimal(TotalSets)\n| extend DiveTime = tostring(CSVFields[30])\n| extend MinTemp = tostring(CSVFields[31])\n| extend todecimal(MinTemp)\n| extend SurfaceInterval = tostring(CSVFields[32])\n| extend Decompression = tostring(CSVFields[33])\n| extend BestLapTime = tostring(CSVFields[34])\n| extend todecimal(BestLapTime)\n| extend NumberofLaps = tostring(CSVFields[35])\n| extend todecimal(NumberofLaps)\n| extend MaxTemp = tostring(CSVFields[36])\n| extend MovingTime = tostring(CSVFields[37])\n| extend todecimal(MovingTime)\n| extend ElapsedTime = tostring(CSVFields[38])\n| extend todecimal(ElapsedTime)\n| extend MinElevation = tostring(CSVFields[39])\n| extend MaxElevation = tostring(CSVFields[40])\n| where Title contains \"Strength\"\n| distinct Date, Title, Calories, Time, AvgHR, MaxHR, AerobicTE",
+                "related": {
+                    "categories": [],
+                    "resourceTypes": [
+                        "microsoft.operationalinsights/workspaces"
+                    ]
+                },
+                "tags": {
+                    "labels": [
+                        "Garmin"
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.OperationalInsights/querypacks/queries",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('querypacks_GarminFitness_name'), '/9bfe4c0f-1281-4463-b9e8-a4eb9e9796b4')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/querypacks', parameters('querypacks_GarminFitness_name'))]"
+            ],
+            "properties": {
+                "displayName": "Garmin Strength Overview",
+                "description": "Column chart showing Months, Reps, Volume for Garmin Strength training",
+                "body": "Garmin2022StrengthTraining_CL\n| extend CSVFields = split(RawData, ',')\n| extend Month = tostring(CSVFields[0])\n| extend Type = tostring(CSVFields[1])\n| extend Reps = tostring(CSVFields[2])\n| extend Volume = tostring(CSVFields[3])\n| extend todecimal(Reps)\n| extend todecimal(Volume)\n| distinct Month, Reps, Volume\n| render columnchart ",
+                "related": {
+                    "categories": [],
+                    "resourceTypes": [
+                        "microsoft.operationalinsights/workspaces"
+                    ]
+                },
+                "tags": {
+                    "labels": [
+                        "Garmin"
+                    ]
+                }
+            }
+        }
+    ]
+}
